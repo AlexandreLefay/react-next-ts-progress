@@ -56,7 +56,7 @@ export default function PokeAPI() {
           {
             <div>
               {types.map((type) => (
-                <li>{type}</li>
+                <li key={type}>{type}</li>
               ))}
             </div>
           }
