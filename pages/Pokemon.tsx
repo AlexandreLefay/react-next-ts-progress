@@ -3,50 +3,72 @@ import axios from "axios"
 
 export default function PokeAPI() {
   const [name, setName] = useState("")
-  const [PokemonId, setPokemonId] = useState(1)
-  const [Find, setFind] = useState("")
-  const [Img, setImg] = useState("")
-  const [Type, setType] = useState("")
+  const [pokemonId, setPokemonId] = useState(1)
+  const [find, setFind] = useState("")
+  const [img, setImg] = useState("")
+  const [types, setType] = useState([""])
 
   useEffect(() => {
     async function getData() {
-      let res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${PokemonId}`)
-      console.log(res)
-      setPokemonId(res.data.id)
-      setFind(res.data.name)
-      setImg(res.data.sprites.front_default)
-      setType(res.data.types[0].type.name)
+      await getPokemonByIdentifier(pokemonId)
     }
 
     getData()
-  }, [PokemonId])
-  console.log(PokemonId + "Id pokemon")
-  const Typename = (event: { target: { value: React.SetStateAction<string> } }) => {
+  }, [pokemonId])
+
+  const Typename = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value)
   }
 
-  const Search = () => {
-    if (name !== "") setFind(name)
+  const Search = async () => {
+    if (name === "") return
+    await getPokemonByIdentifier(name)
     setName("")
   }
 
-  const handleNext = () => setPokemonId(PokemonId + 1)
-  const handlePrevious = () => setPokemonId(PokemonId - 1)
+  const handleNext = () => setPokemonId(pokemonId + 1)
+  const handlePrevious = () => setPokemonId(pokemonId - 1)
 
+  const setPokemon = (res: any) => {
+    setPokemonId(res.data.id)
+    setFind(res.data.name)
+    setImg(res.data.sprites.front_default)
+    setType(res.data.types.map((t: any) => t.type.name))
+    console.log(types)
+  }
+
+  const getPokemonByIdentifier = async (identifier: number | string) => {
+    let res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${identifier}`)
+    setPokemon(res)
+  }
+
+  // console.log(type.map())
+  const reptiles = ["alligator", "snake", "lizard"]
   return (
     <>
       <div className="back">
         <div className="card">
-          <img src={`${Img}`} alt="" />
+          <img src={`${img}`} alt="" />
           <div className="name">
-            {Find.toUpperCase()} N°{PokemonId}
+            {find.toUpperCase()} N°{pokemonId}
           </div>
 
-          <div className="type">{Type}</div>
+          {
+            <div>
+              {types.map((type) => (
+                <li>{type}</li>
+              ))}
+            </div>
+          }
+          {/* <div className="type">
+            {types.map((type: any) => (
+              <div>{type}</div>
+            ))}{" "}
+          </div> */}
 
           <input type="text" onChange={Typename} value={name} />
 
-          <button>Search</button>
+          <button onClick={Search}>Search</button>
         </div>
         <button onClick={handlePrevious}>Previous</button>
         <button onClick={handleNext}>Next</button>
